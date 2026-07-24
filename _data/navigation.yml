@@ -8,6 +8,9 @@
 #      Markdown formatted page while the second is generated using JSON.
 
 main:
+  - title: "Mid-Year Report"
+    url: /report-2026/
+
   - title: "Publications"
     url: /publications/
 
