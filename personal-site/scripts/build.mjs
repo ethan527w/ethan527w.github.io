@@ -1,8 +1,13 @@
-import { mkdir, rm, cp, writeFile } from 'node:fs/promises';
+import { mkdir, rm, cp, writeFile, readFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { profile, projects, research, experiences, currentWork } from '../site/content.mjs';
 import { renderContent } from '../site/pages.mjs';
 
 const out = new URL('../dist/', import.meta.url);
+const assetVersion = createHash('sha256')
+  .update(await readFile(new URL('../site/assets/style.css', import.meta.url)))
+  .update(await readFile(new URL('../site/assets/app.js', import.meta.url)))
+  .digest('hex').slice(0, 12);
 const esc = s => String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 const arrow = '';
 const ext = (href, label, cls='text-link') => `<a class="${cls}" href="${esc(href)}" target="_blank" rel="noopener noreferrer">${label} ${arrow}</a>`;
@@ -12,7 +17,7 @@ function pageHead(kicker,title,description) {return `<section class="page-head">
 function sectionTitle(no,title,link) {return `<div class="section-heading"><h2>${title}</h2>${link||''}</div>`;}
 
 function layout(title, description, active, main) {
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="dark"><title>${esc(title)} — Ethan (Yichen) Wu</title><meta name="description" content="${esc(description)}"><meta property="og:title" content="${esc(title)} — Ethan (Yichen) Wu"><meta property="og:description" content="${esc(description)}"><meta property="og:type" content="website"><meta name="theme-color" content="#101310"><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/style.css"><script src="/assets/app.js" defer></script></head><body><a class="skip-link" href="#main">Skip to content</a><div class="site-shell"><header class="site-header"><a class="brand" href="/" aria-label="Ethan（YCHEN）无 home"><span class="brand-mark" aria-hidden="true">ew</span><span>Ethan（YCHEN）无</span></a><nav aria-label="Main navigation">${[['projects','Work'],['research','Research'],['publications','Publications'],['now','Now'],['about','About'],['contact','Contact']].map(([path,label])=>`<a href="/${path}/"${active===path?' aria-current="page"':''}>${label}</a>`).join('')}</nav></header><main id="main" tabindex="-1">${main}</main><footer><span>© ${new Date().getUTCFullYear()} Ethan Wu</span><div>${ext(profile.github,'GitHub')}${ext(profile.linkedin,'LinkedIn')}<a href="/contact/">Contact</a></div></footer></div></body></html>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="dark"><title>${esc(title)} — Ethan (Yichen) Wu</title><meta name="description" content="${esc(description)}"><meta property="og:title" content="${esc(title)} — Ethan (Yichen) Wu"><meta property="og:description" content="${esc(description)}"><meta property="og:type" content="website"><meta name="theme-color" content="#101310"><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/style.css?v=${assetVersion}"><script src="/assets/app.js?v=${assetVersion}" defer></script></head><body><a class="skip-link" href="#main">Skip to content</a><div class="site-shell"><header class="site-header"><a class="brand" href="/" aria-label="Ethan（YCHEN）无 home"><span class="brand-mark" aria-hidden="true">ew</span><span>Ethan（YCHEN）无</span></a><nav aria-label="Main navigation">${[['projects','Work'],['research','Research'],['publications','Publications'],['now','Now'],['about','About'],['contact','Contact']].map(([path,label])=>`<a href="/${path}/"${active===path?' aria-current="page"':''}>${label}</a>`).join('')}</nav></header><main id="main" tabindex="-1">${main}</main><footer><span>© ${new Date().getUTCFullYear()} Ethan Wu</span><div>${ext(profile.github,'GitHub')}${ext(profile.linkedin,'LinkedIn')}<a href="/contact/">Contact</a></div></footer></div></body></html>`;
 }
 
 const {home, work, researchPage, publicationsPage, about, now, architecture} = renderContent({profile, projects, research, experiences, currentWork, card, tags, ext, arrow, esc, pageHead, sectionTitle});
