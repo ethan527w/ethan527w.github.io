@@ -12,7 +12,8 @@ for(const page of pages){
   if(new Set(ids).size!==ids.length)errors.push(`${page}: duplicate IDs`);
   for(const [,href] of html.matchAll(/(?:href|src)="([^"]+)"/g)){
     if(!href.startsWith('/')||href.startsWith('//'))continue;
-    const target=join(root,href.endsWith('/')?href+'index.html':href);
+    const cleanPath=href.split(/[?#]/,1)[0];
+    const target=join(root,cleanPath.endsWith('/')?cleanPath+'index.html':cleanPath);
     try{await stat(target);}catch{errors.push(`${page}: broken local reference ${href}`);}
   }
   if(/href="#"|href="javascript:|Lorem ipsum|TODO/.test(html))errors.push(`${page}: unfinished link or copy`);
